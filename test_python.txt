@@ -1,0 +1,35 @@
+# PostgreSQL connection options
+x = ["tblh_candidate",
+     "tblh_student",
+     "tblm_academic_year",
+     "tblm_school_unit",
+     "tblt_student_payment",
+]
+
+pg_options = {
+    "url": "jdbc:postgresql://38.47.68.126:5432/dev_msisms",
+    "user": "msismsdev",
+    "password": "msi010803",
+    "driver": "org.postgresql.Driver"
+}
+
+# Snowflake connection options
+sf_options = {
+    "sfURL": "https://uiwgayz-py95223.snowflakecomputing.com",
+    "sfUser": "fredericofritz",
+    "sfPassword": "Frederico1@3",
+    "sfDatabase": "SMS",
+    "sfSchema": "rico_schema",
+    "sfWarehouse": "COMPUTE_WH"
+}
+
+# Loop through each table and write data to Snowflake
+for table in x:
+    pg_options["dbtable"] = table
+    df_pg = spark.read.format("jdbc").options(**pg_options).load()
+    df_pg.write \
+        .format("snowflake") \
+        .options(**sf_options) \
+        .option("dbtable", table) \
+        .mode("overwrite") \
+        .save()
